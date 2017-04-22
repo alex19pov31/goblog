@@ -7,10 +7,12 @@ import (
 	"regexp"
 )
 
+type Data map[string]interface{}
+
 type Route struct {
 	baseURI  string
 	checked  bool
-	data     interface{}
+	data     Data
 	tpl      []string
 	request  *http.Request
 	response http.ResponseWriter
@@ -57,6 +59,9 @@ func (rt *Route) checkRegexp(pattern string) bool {
 
 func (rt *Route) render(layout string, data interface{}, tpl ...string) {
 	t, _ := template.ParseFiles(tpl...)
+	if data == false {
+		data = rt.data
+	}
 	if err := t.ExecuteTemplate(rt.response, layout, data); err != nil {
 		log.Println(err)
 	}
