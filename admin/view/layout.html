@@ -49,10 +49,9 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
           <ul class="nav navbar-nav navbar-right">
-            <li><a href="#">Админка</a></li>
-            <li><a href="#">Настройки</a></li>
-            <li><a href="#">Профиль</a></li>
-            <li><a href="#">Помощь</a></li>
+            {{range .tmenu}}
+                <li><a href="{{.URL}}">{{.Text}}</a></li>
+            {{end}}
           </ul>
           <form class="navbar-form navbar-right">
             <input type="text" class="form-control" placeholder="Поиск...">
@@ -65,7 +64,7 @@
       <div class="row">
         <div class="col-sm-3 col-md-2 sidebar">
           <ul class="nav nav-sidebar">
-            {{range .menu}}
+            {{range .lmenu}}
                 <li{{if .Current}} class="active"{{end}}><a href="{{.URL}}">{{.Text}}</a></li>
             {{end}}
           </ul>

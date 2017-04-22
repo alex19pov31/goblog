@@ -5,7 +5,14 @@ import (
 	"net/http"
 )
 
-var arMenu = menu{
+var topMenu = menu{
+	{url: "/admin/", text: "Админка"},
+	{url: "/admin/config/", text: "Настройки"},
+	{url: "/admin/profile/", text: "Профиль"},
+	{url: "/admin/help/", text: "Помощь"},
+}
+
+var leftMenu = menu{
 	{url: "/admin/", text: "Главная"},
 	{url: "/admin/posts/", text: "Статьи"},
 	{url: "/admin/users/", text: "Пользователи"},
@@ -24,8 +31,9 @@ func main() {
 }
 
 func startRoute(w http.ResponseWriter, r *http.Request) {
-	arMenu.updateMenu(r.RequestURI)
-	rt := Route{baseURI: "/admin", request: r, response: w, data: Data{"menu": arMenu}}
+	topMenu.updateMenu(r.RequestURI)
+	leftMenu.updateMenu(r.RequestURI)
+	rt := Route{baseURI: "/admin", request: r, response: w, data: Data{"tmenu": topMenu, "lmenu": leftMenu}}
 
 	rt.get("/posts/\\d+/?(|\\?.*)$", func(rt *Route) {
 		rt.render("layout", false, "view/layout.html", "view/post.html")
