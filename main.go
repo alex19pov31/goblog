@@ -43,14 +43,17 @@ func main() {
 
 func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 
+	r.ParseForm()
+	fmt.Println(r.Form)
+
 	topMenu.UpdateMenu(r.RequestURI)
 	leftMenu.UpdateMenu(r.RequestURI)
 	rt := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}
 	pc := controllers.NewPostController()
 
-	rt.Get("/posts/\\d+/?(|\\?.*)$", pc.GetPost)
-	rt.Get("/posts/new/?(|\\?.*)$", pc.CreatePost)
+	rt.Get("/posts/new/?(|\\?.*)$", pc.NewForm)
 	rt.Post("/posts/new/?(|\\?.*)$", pc.CreatePost)
+	rt.Get("/posts/[^/\\?]+/?(|\\?.*)$", pc.GetPost)
 	rt.Get("/posts/?(|\\?.*)$", pc.IndexPost)
 
 	rt.Get("/(|\\?.*)$", func(rt *helpers.Route) {
@@ -67,7 +70,6 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 func startMainRoute(w http.ResponseWriter, r *http.Request) {
 
 	rtMain := helpers.Route{BaseURI: "", Request: r, Response: w}
-	fmt.Println("test")
 	rtMain.Get("/(|\\?.*)$", func(rt *helpers.Route) {
 		rt.Render("layout", false, "view/main/layout.html", "view/main/index.html")
 	})
