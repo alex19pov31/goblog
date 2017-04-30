@@ -51,9 +51,11 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 	rt := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}
 	pc := controllers.NewPostController()
 
+	rt.Get("/posts/delete/[^/\\?]{24}/?(|\\?.*)$", pc.DeletePost)
 	rt.Get("/posts/new/?(|\\?.*)$", pc.NewForm)
 	rt.Post("/posts/new/?(|\\?.*)$", pc.CreatePost)
-	rt.Get("/posts/[^/\\?]+/?(|\\?.*)$", pc.GetPost)
+	rt.Get("/posts/[^/\\?]{24}/?(|\\?.*)$", pc.GetPost)
+	rt.Post("/posts/[^/\\?]{24}/?(|\\?.*)$", pc.UpdatePost)
 	rt.Get("/posts/?(|\\?.*)$", pc.IndexPost)
 
 	rt.Get("/(|\\?.*)$", func(rt *helpers.Route) {

@@ -1,6 +1,9 @@
 package controllers
 
 import (
+	"fmt"
+	"gopkg.in/mgo.v2/bson"
+	"regexp"
 	"testapi/helpers"
 	"testapi/models"
 	"time"
@@ -17,12 +20,16 @@ func NewPostController() *PostController {
 }
 
 func (pc *PostController) GetPost(rt *helpers.Route) {
-	//id := regexp.MustCompile("/posts/(\\d+)/?(|\\?.*)$").FindStringSubmatch(rt.request.RequestURI)[1]
+	id := regexp.MustCompile("/posts/([^/\\?]{24})/?(|\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]
+	Post, err := ps.FindOne(bson.M{"_id": bson.ObjectIdHex(id)})
+	rt.Data["Post"] = Post
 
-	db := helpers.DB{Host: "localhost", DBname: "testdb"}
-	db.GetCollection("posts")
-
-	rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
+	if err != nil {
+		//rt.Redirect("/admin/posts", 302)
+		rt.Render("layout", false, "view/admin/layout.html", "view/admin/404.html")
+	} else {
+		rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
+	}
 }
 
 func (pc *PostController) NewForm(rt *helpers.Route) {
@@ -43,21 +50,46 @@ func (pc *PostController) CreatePost(rt *helpers.Route) {
 	ps.Collection.Insert(&Post)
 	rt.Data["Post"] = Post
 
-	rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
+	if data.Get("action") == "save" {
+		rt.Redirect("/admin/posts/", 302)
+	} else {
+		rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
+	}
 }
 
 func (pc *PostController) UpdatePost(rt *helpers.Route) {
-	//var result interface{}
+	id := regexp.MustCompile("/posts/([^/\\?]{24})/?(|\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]
 
-	//id := 1
-	//pc.collection.Find(bson.M{"_id": id}).One(&result)
+	rt.Request.ParseForm()
+	data := rt.Request.Form
+
+	Post := models.Post{
+		Title:      data.Get("title"),
+		Preview:    data.Get("preview"),
+		Text:       data.Get("text"),
+		Updated_at: time.Now()}
+
+	ps.Collection.Update(bson.M{"_id": bson.ObjectIdHex(id)}, &Post)
+
+	rt.Data["Post"] = Post
+
+	if data.Get("action") == "save" {
+		rt.Redirect("/admin/posts/", 302)
+	} else {
+		rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
+	}
 }
 
 func (pc *PostController) DeletePost(rt *helpers.Route) {
+	id := regexp.MustCompile("/posts/delete/([^/\\?]{24})/?(|\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]
+	fmt.Println(id)
 
+	ps.Collection.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+	rt.Redirect("/admin/posts/", 302)
 }
 
 func (pc *PostController) IndexPost(rt *helpers.Route) {
-	rt.Data["etts"] = "ers"
+	rt.Data["posts"] = ps.FindAll(bson.M{})
+
 	rt.Render("layout", false, "view/admin/layout.html", "view/admin/posts.html")
 }

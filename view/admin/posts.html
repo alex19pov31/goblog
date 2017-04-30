@@ -1,3 +1,39 @@
 {{define "body"}} 
-    {{.}}
+
+  <h1 class="page-header">Список статей</h1>
+  <div class="table-responsive">
+    
+    <div class="row">
+      <div class="col-md-10">
+      </div>
+      <div class="col-md-2">
+        <a class="btn btn-default btn-success" href="/admin/posts/new">Добавить статью</a>
+      </div>
+    </div>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Заголовок</th>
+          <th>Дата добавления</th>
+          <th>Дата обновления</th>
+          <th></th>
+          <th></th>
+
+        </tr>
+      </thead>
+      <tbody>
+        {{range .posts}}
+          <tr>
+            <td>{{ .GetId }}</td>
+            <td>{{ .Title }}</td>
+            <td>{{ .Created_at }}</td>
+            <td>{{ .Updated_at }}</td>
+            <td><a href="/admin/posts/{{.GetId}}">Редактировать</a></td>
+            <td><a href="/admin/posts/delete/{{.GetId}}">Удалить</a></td>
+          </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
 {{end}}

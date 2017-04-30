@@ -43,6 +43,10 @@ func (rt *Route) NotFound(layout string, Tpl ...string) {
 	}
 }
 
+func (rt *Route) Redirect(url string, code int) {
+	http.Redirect(rt.Response, rt.Request, url, code)
+}
+
 func (rt *Route) CheckRegexp(Pattern string) bool {
 	if rt.Checked == true {
 		return false
