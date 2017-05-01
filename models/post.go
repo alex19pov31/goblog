@@ -10,6 +10,8 @@ import (
 type Post struct {
 	Id         bson.ObjectId `bson:"_id,omitempty"`
 	Title      string        `bson:"title"`
+	Code       string        `bson:"code"`
+	Active     bool          `bson:"status"`
 	Preview    string        `bson:"preview"`
 	Text       string        `bson:"text"`
 	User       User          `bson:"user"`

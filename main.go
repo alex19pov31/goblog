@@ -1,13 +1,10 @@
 package main
 
 import (
-	//"./controllers"
-	"fmt"
 	"log"
 	"net/http"
 	"testapi/controllers"
 	"testapi/helpers"
-	//"regexp"
 )
 
 var topMenu = helpers.Menu{
@@ -30,22 +27,18 @@ func main() {
 	public := http.FileServer(http.Dir("./public"))
 	theme := http.FileServer(http.Dir("./themes/startbootstrap-blog-post"))
 
-	http.Handle("/admin/theme/", http.StripPrefix("/admin/theme/", themeAdmin))
-	http.Handle("/admin/public/", http.StripPrefix("/admin/public/", publicAdmin))
-	http.Handle("/theme/", http.StripPrefix("/theme/", theme))
-	http.Handle("/public/", http.StripPrefix("/public/", public))
+	go http.Handle("/admin/theme/", http.StripPrefix("/admin/theme/", themeAdmin))
+	go http.Handle("/admin/public/", http.StripPrefix("/admin/public/", publicAdmin))
+	go http.Handle("/theme/", http.StripPrefix("/theme/", theme))
+	go http.Handle("/public/", http.StripPrefix("/public/", public))
 
-	http.HandleFunc("/", startMainRoute)
-	http.HandleFunc("/admin/", startAdminRoute)
+	go http.HandleFunc("/", startMainRoute)
+	go http.HandleFunc("/admin/", startAdminRoute)
 
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
 
 func startAdminRoute(w http.ResponseWriter, r *http.Request) {
-
-	r.ParseForm()
-	fmt.Println(r.Form)
-
 	topMenu.UpdateMenu(r.RequestURI)
 	leftMenu.UpdateMenu(r.RequestURI)
 	rt := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}

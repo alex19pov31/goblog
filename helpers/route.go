@@ -20,7 +20,7 @@ type Route struct {
 }
 
 func (rt *Route) Route(method string, Pattern string, handler func(route *Route)) {
-	if rt.Request.Method == method && rt.CheckRegexp(Pattern) || method == "ANY" && rt.CheckRegexp(Pattern) {
+	if rt.Checked != true && rt.Request.Method == method && rt.CheckRegexp(Pattern) || method == "ANY" && rt.CheckRegexp(Pattern) {
 		handler(rt)
 	}
 }

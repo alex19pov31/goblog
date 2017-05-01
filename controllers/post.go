@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"gopkg.in/mgo.v2/bson"
 	"regexp"
 	"testapi/helpers"
@@ -46,7 +45,6 @@ func (pc *PostController) CreatePost(rt *helpers.Route) {
 		Text:       data.Get("text"),
 		Created_at: time.Now(),
 		Updated_at: time.Now()}
-
 	ps.Collection.Insert(&Post)
 	rt.Data["Post"] = Post
 
@@ -62,15 +60,12 @@ func (pc *PostController) UpdatePost(rt *helpers.Route) {
 
 	rt.Request.ParseForm()
 	data := rt.Request.Form
-
 	Post := models.Post{
 		Title:      data.Get("title"),
 		Preview:    data.Get("preview"),
 		Text:       data.Get("text"),
 		Updated_at: time.Now()}
-
 	ps.Collection.Update(bson.M{"_id": bson.ObjectIdHex(id)}, &Post)
-
 	rt.Data["Post"] = Post
 
 	if data.Get("action") == "save" {
@@ -82,14 +77,11 @@ func (pc *PostController) UpdatePost(rt *helpers.Route) {
 
 func (pc *PostController) DeletePost(rt *helpers.Route) {
 	id := regexp.MustCompile("/posts/delete/([^/\\?]{24})/?(|\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]
-	fmt.Println(id)
-
 	ps.Collection.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
 	rt.Redirect("/admin/posts/", 302)
 }
 
 func (pc *PostController) IndexPost(rt *helpers.Route) {
 	rt.Data["posts"] = ps.FindAll(bson.M{})
-
 	rt.Render("layout", false, "view/admin/layout.html", "view/admin/posts.html")
 }
