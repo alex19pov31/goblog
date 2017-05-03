@@ -41,25 +41,42 @@ func main() {
 func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 	topMenu.UpdateMenu(r.RequestURI)
 	leftMenu.UpdateMenu(r.RequestURI)
-	rt := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}
-	pc := controllers.NewPostController()
+	route := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}
 
-	rt.Get("/posts/delete/[^/\\?]{24}/?(|\\?.*)$", pc.DeletePost)
-	rt.Get("/posts/new/?(|\\?.*)$", pc.NewForm)
-	rt.Post("/posts/new/?(|\\?.*)$", pc.CreatePost)
-	rt.Get("/posts/[^/\\?]{24}/?(|\\?.*)$", pc.GetPost)
-	rt.Post("/posts/[^/\\?]{24}/?(|\\?.*)$", pc.UpdatePost)
-	rt.Get("/posts/?(|\\?.*)$", pc.IndexPost)
+	postsRoute(&route)
+	usersRoute(&route)
 
-	rt.Get("/(|\\?.*)$", func(rt *helpers.Route) {
-		rt.Data["etts"] = "ers"
-		rt.Render("layout", false, "view/admin/layout.html", "view/admin/index.html")
+	route.Get("/(|\\?.*)$", func(route *helpers.Route) {
+		route.Render("layout", false, "view/admin/layout.html", "view/admin/index.html")
 	})
-	rt.Get("/login/?(|\\?.*)$", func(rt *helpers.Route) {
-		rt.Render("layout", false, "view/admin/login.html")
+	route.Get("/login/?(|\\?.*)$", func(route *helpers.Route) {
+		route.Render("layout", false, "view/admin/login.html")
 	})
 
-	rt.NotFound("layout", "view/admin/layout.html", "view/admin/404.html")
+	route.NotFound("layout", "view/admin/layout.html", "view/admin/404.html")
+}
+
+func postsRoute(route *helpers.Route) {
+	cnt := controllers.NewPostController()
+
+	route.Get("/posts/delete/[^/\\?]{24}/?(|\\?.*)$", cnt.DeletePost)
+	route.Get("/posts/new/?(|\\?.*)$", cnt.NewForm)
+	route.Post("/posts/new/?(|\\?.*)$", cnt.CreatePost)
+	route.Get("/posts/[^/\\?]{24}/?(|\\?.*)$", cnt.GetPost)
+	route.Post("/posts/[^/\\?]{24}/?(|\\?.*)$", cnt.UpdatePost)
+	route.Get("/posts/?(|\\?.*)$", cnt.IndexPost)
+}
+
+func usersRoute(route *helpers.Route) {
+	cnt := controllers.NewUserController()
+
+	route.Get("/users/?(|\\?.*)$", cnt.Index)
+	route.Get("/users/new?(|\\?.*)$", cnt.New)
+	route.Post("/users/new?(|\\?.*)$", cnt.Create)
+	route.Get("/users/[^/\\?]{24}/?(|\\?.*)$", cnt.Get)
+	route.Post("/users/[^/\\?]{24}/?(|\\?.*)$", cnt.Update)
+	route.Get("/users/delete/[^/\\?]{24}/?(|\\?.*)$", cnt.Delete)
+	route.Get("/users/active/[^/\\?]{24}/?(|\\?.*)$", cnt.Active)
 }
 
 func startMainRoute(w http.ResponseWriter, r *http.Request) {

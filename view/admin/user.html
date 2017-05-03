@@ -1,0 +1,53 @@
+{{define "body"}}
+
+    {{ if .User }}
+        <h1>Редактирование пользователя</h1>
+    {{else}}
+        <h1>Добавление пользователя</h1>
+    {{end}}
+
+    <div class="bs-example" data-example-id="basic-forms"> 
+        <form lpformnum="1" method="POST">
+            <div class="form-group"> 
+                <label for="login">Логин</label> 
+                <input type="text" class="form-control" id="login" placeholder="Логин" autocomplete="off" name="login" value="{{.User.Login}}"> 
+            </div>
+            <div class="form-group"> 
+                <label for="email">Email</label> 
+                <input type="email" class="form-control" id="email" placeholder="Email" autocomplete="off" name="email" value="{{.User.Email}}"> 
+            </div>
+
+            <div class="form-group"> 
+                <label for="role">Роль</label> 
+                <select name="role" id="role" class="form-control">
+                  <option value="admin"{{ if .User.Rol eq 1 }} selected{{ end }}>Администратор</option>
+                  <option value="user"{{ if .User.Rol eq 0 }} selected{{ end }}>Пользователь</option>
+                </select>
+            </div>
+
+            <div class="form-group"> 
+              <label for="password1">Пароль</label> 
+              <input type="password" class="form-control" id="password1" name="password" placeholder="Пароль"> 
+            </div> 
+            <div class="form-group">
+              <label for="password2">Повторите пароль</label> 
+              <input type="password" class="form-control" id="password2" name="repeatPassword" placeholder="Повторите пароль"> 
+            </div>
+            <div class="form-group checkbox">
+              <label>
+                <input type="checkbox" id="active" name="active"{{ if .User.Active }} checked{{ end }}> Активировать
+              </label>
+            </div>
+            
+            <button type="submit" class="btn btn-default" name="action" value="save">Сохранить</button>
+            <button type="submit" class="btn btn-default" name="action" value="apply">Применить</button>
+        </form> 
+    </div>
+<!--
+    <script src="//cdn.ckeditor.com/4.6.2/full/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace( 'text' );
+        CKEDITOR.replace( 'preview' );
+    </script>
+-->
+{{end}}

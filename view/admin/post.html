@@ -1,6 +1,10 @@
 {{define "body"}}
 
-    <h1>Редактирование статьи</h1>
+    {{if .Post }}
+        <h1>Редактирование статьи</h1>
+    {{else}}
+        <h1>Добавление статьи</h1>
+    {{end}}
 
     <div class="bs-example" data-example-id="basic-forms"> 
         <form lpformnum="1" method="POST"> 
@@ -8,6 +12,15 @@
                 <label for="Title">Заголовок</label> 
                 <input type="text" class="form-control" id="Title" placeholder="Заголовок" autocomplete="off" name="title" value="{{.Post.Title}}"> 
             </div>
+            <div class="form-group"> 
+                <label for="code">Символьный код</label> 
+                <input type="text" class="form-control" id="code" placeholder="Символьный код" autocomplete="off" name="code" value="{{.Post.Code}}"> 
+            </div>
+            <div class="form-group checkbox">
+              <label>
+                <input type="checkbox" id="active" name="active"{{if .Active }} checked {{end}} value="1"> Опубликовано
+              </label>
+            </div>         
             <div class="form-group">
               <label for="preview">Текст для предпросмотра</label> 
               <textarea class="form-control" name="preview" id="preview" rows="4" >{{.Post.Preview}}</textarea>
@@ -18,13 +31,15 @@
             </div>
             
             <button type="submit" class="btn btn-default" name="action" value="save">Сохранить</button>
-            <button type="submit" class="btn btn-default" name="action" value="apply">Применить</button>
+            {{if .Post }}
+                <button type="submit" class="btn btn-default" name="action" value="apply">Применить</button>
+            {{end}}
         </form> 
     </div>
 
     <script src="//cdn.ckeditor.com/4.6.2/full/ckeditor.js"></script>
     <script>
-            CKEDITOR.replace( 'text' );
-            CKEDITOR.replace( 'preview' );
+        CKEDITOR.replace( 'text' );
+        CKEDITOR.replace( 'preview' );
     </script>
 {{end}}

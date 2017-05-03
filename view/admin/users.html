@@ -1,0 +1,45 @@
+{{define "body"}} 
+
+  <h1 class="page-header">Список пользователей</h1>
+  <div class="table-responsive">
+    
+    <div class="row">
+      <div class="col-md-10">
+      </div>
+      <div class="col-md-2">
+        <a class="btn btn-default btn-success" href="/admin/users/new">Добавить пользователя</a>
+      </div>
+    </div>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Логин</th>
+          <th>Email</th>
+          <th>Роль</th>
+          <th>Активность</th>
+          <th>Дата обновления</th>
+          <th>Дата обновления</th>
+          <th></th>
+          <th></th>
+
+        </tr>
+      </thead>
+      <tbody>
+        {{range .posts}}
+          <tr>
+            <td>{{ .Login }}</td>
+            <td>{{ .Email }}</td>
+            <td>{{ .Role }}</td>
+            <td>{{ .Active }}</td>
+            <td>{{ .Created_at }}</td>
+            <td>{{ .Updated_at }}</td>
+            <td><a href="/admin/users/{{.GetId}}">Редактировать</a></td>
+            <td><a href="/admin/users/active/{{.GetId}}">Активировать/Деактивировать</a></td>
+            <td><a href="/admin/users/delete/{{.GetId}}">Удалить</a></td>
+          </tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+{{end}}

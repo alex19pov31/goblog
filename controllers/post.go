@@ -40,6 +40,7 @@ func (pc *PostController) CreatePost(rt *helpers.Route) {
 	data := rt.Request.Form
 
 	Post := models.Post{
+		Id:         bson.NewObjectId(),
 		Title:      data.Get("title"),
 		Preview:    data.Get("preview"),
 		Text:       data.Get("text"),
@@ -49,7 +50,7 @@ func (pc *PostController) CreatePost(rt *helpers.Route) {
 	rt.Data["Post"] = Post
 
 	if data.Get("action") == "save" {
-		rt.Redirect("/admin/posts/", 302)
+		rt.Redirect("/admin/posts/"+Post.Id.Hex(), 302)
 	} else {
 		rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
 	}
@@ -60,12 +61,22 @@ func (pc *PostController) UpdatePost(rt *helpers.Route) {
 
 	rt.Request.ParseForm()
 	data := rt.Request.Form
-	Post := models.Post{
-		Title:      data.Get("title"),
-		Preview:    data.Get("preview"),
-		Text:       data.Get("text"),
-		Updated_at: time.Now()}
-	ps.Collection.Update(bson.M{"_id": bson.ObjectIdHex(id)}, &Post)
+
+	Post, err := ps.FindOne(bson.M{"_id": bson.ObjectIdHex(id)})
+	if err == nil {
+		Post.Title = data.Get("title")
+		Post.Preview = data.Get("preview")
+		Post.Code = data.Get("code")
+		Post.Text = data.Get("text")
+		Post.Updated_at = time.Now()
+		if data.Get("active") == "1" {
+			Post.Active = true
+		} else {
+			Post.Active = true
+		}
+
+		ps.Collection.Update(bson.M{"_id": bson.ObjectIdHex(id)}, &Post)
+	}
 	rt.Data["Post"] = Post
 
 	if data.Get("action") == "save" {
