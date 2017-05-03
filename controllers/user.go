@@ -3,6 +3,7 @@ package controllers
 import (
 	"gopkg.in/mgo.v2/bson"
 	"regexp"
+	"strconv"
 	"testapi/helpers"
 	"testapi/models"
 	"time"
@@ -38,14 +39,16 @@ func (pc *UserController) New(rt *helpers.Route) {
 func (pc *UserController) Create(rt *helpers.Route) {
 	rt.Request.ParseForm()
 	data := rt.Request.Form
+	active, _ := strconv.ParseBool(data.Get("active"))
+	role, _ := strconv.Atoi(data.Get("role"))
 
 	User := models.User{
 		Id:         bson.NewObjectId(),
 		Login:      data.Get("login"),
 		Email:      data.Get("email"),
-		Role:       data.Get("role"),
+		Role:       role,
 		Password:   data.Get("password1"),
-		Active:     data.Get("active"),
+		Active:     active,
 		Created_at: time.Now(),
 		Updated_at: time.Now()}
 	ur.Collection.Insert(&User)
@@ -60,16 +63,18 @@ func (pc *UserController) Create(rt *helpers.Route) {
 
 func (pc *UserController) Update(rt *helpers.Route) {
 	id := regexp.MustCompile("/users/([^/\\?]{24})/?(|\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]
-
 	rt.Request.ParseForm()
 	data := rt.Request.Form
+	active, _ := strconv.ParseBool(data.Get("active"))
+	role, _ := strconv.Atoi(data.Get("role"))
+
 	User, err := ur.FindOne(bson.M{"_id": bson.ObjectIdHex(id)})
 	if err == nil {
 		User.Login = data.Get("login")
 		User.Email = data.Get("email")
-		User.Role = data.Get("role")
+		User.Role = role
 		User.Password = data.Get("password1")
-		User.Active = data.Get("active")
+		User.Active = active
 		User.Updated_at = time.Now()
 		ur.Collection.Update(bson.M{"_id": bson.ObjectIdHex(id)}, &User)
 	}
