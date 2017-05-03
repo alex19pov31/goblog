@@ -20,8 +20,8 @@
             <div class="form-group"> 
                 <label for="role">Роль</label> 
                 <select name="role" id="role" class="form-control">
-                  <option value="admin"{{ if .User.Rol eq 1 }} selected{{ end }}>Администратор</option>
-                  <option value="user"{{ if .User.Rol eq 0 }} selected{{ end }}>Пользователь</option>
+                  <option value="1"{{ if .User.Rol eq 1 }} selected{{ end }}>Администратор</option>
+                  <option value="0"{{ if .User.Rol eq 0 }} selected{{ end }}>Пользователь</option>
                 </select>
             </div>
 
