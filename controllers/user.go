@@ -63,7 +63,7 @@ func (pc *UserController) Update(rt *helpers.Route) {
 
 	rt.Request.ParseForm()
 	data := rt.Request.Form
-	Post, err := ps.FindOne(bson.M{"_id": bson.ObjectIdHex(id)})
+	User, err := ur.FindOne(bson.M{"_id": bson.ObjectIdHex(id)})
 	if err == nil {
 		User.Login = data.Get("login")
 		User.Email = data.Get("email")
@@ -90,9 +90,9 @@ func (pc *UserController) Delete(rt *helpers.Route) {
 
 func (pc *UserController) Active(rt *helpers.Route) {
 	id := regexp.MustCompile("/posts/users/([^/\\?]{24})/?(|\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]
-	Post, err := ps.FindOne(bson.M{"_id": bson.ObjectIdHex(id)})
+	User, err := ur.FindOne(bson.M{"_id": bson.ObjectIdHex(id)})
 	if err != nil {
-		Post.Active = true
+		User.Active = true
 		User.Updated_at = time.Now()
 		ur.Collection.Update(bson.M{"_id": bson.ObjectIdHex(id)}, &User)
 	}
