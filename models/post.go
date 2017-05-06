@@ -1,11 +1,11 @@
 package models
 
 import (
-	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
-	"testapi/helpers"
 	"time"
 )
+
+var postCollection = dbConnect.GetCollection("posts")
 
 type Post struct {
 	Id         bson.ObjectId `bson:"_id,omitempty"`
@@ -18,36 +18,60 @@ type Post struct {
 	Created_at time.Time     `bson:"created_at,omitempty"`
 	Updated_at time.Time     `bson:"updated_at"`
 }
+type PostList []Post
+
+func InitPost() Post {
+	return Post{}
+}
 
 func (post *Post) GetId() string {
 	return post.Id.Hex()
 }
 
-type PostResult struct {
-	DB         *helpers.DB
-	Collection *mgo.Collection
-	Result     []Post
-}
-
-func NewPostResult() *PostResult {
-	db := helpers.DB{Host: "localhost", DBname: "testdb"}
-	return &PostResult{DB: &db, Collection: db.GetCollection("posts")}
-}
-
-func (res *PostResult) GetCollection() *mgo.Collection {
-	if res.Collection == nil {
-		res.Collection = res.DB.GetCollection("posts")
+func (post *Post) Save() {
+	post.Updated_at = time.Now()
+	if post.Id == "" {
+		post.Id = bson.NewObjectId()
+		post.Created_at = post.Updated_at
+		postCollection.Insert(&post)
+	} else {
+		postCollection.Update(bson.M{"_id": post.Id}, &post)
 	}
-
-	return res.Collection
 }
 
-func (res *PostResult) FindOne(query bson.M) (Post, error) {
-	post := Post{}
-	err := res.GetCollection().Find(query).One(&post)
+func (post Post) FindOne(query bson.M) (Post, error) {
+	err := postCollection.Find(query).One(&post)
+
 	return post, err
 }
-func (res *PostResult) FindAll(query bson.M) interface{} {
-	res.GetCollection().Find(query).All(&res.Result)
-	return res.Result
+
+func (post Post) FindById(id string) (Post, error) {
+	err := postCollection.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&post)
+
+	return post, err
+}
+
+func (post Post) FindAll(query bson.M) PostList {
+	var posts PostList
+	postCollection.Find(query).All(&posts)
+
+	return posts
+}
+
+func (post Post) Delete() error {
+	err := postCollection.Remove(bson.M{"_id": post.Id})
+
+	return err
+}
+
+func (post Post) DeleteByQuery(query bson.M) error {
+	err := postCollection.Remove(query)
+
+	return err
+}
+
+func (post Post) DeleteById(id string) error {
+	err := postCollection.Remove(bson.M{"_id": bson.ObjectIdHex(id)})
+
+	return err
 }

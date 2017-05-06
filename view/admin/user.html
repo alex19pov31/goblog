@@ -20,18 +20,18 @@
             <div class="form-group"> 
                 <label for="role">Роль</label> 
                 <select name="role" id="role" class="form-control">
-                  <option value="1"{{ if .User.Rol eq 1 }} selected{{ end }}>Администратор</option>
-                  <option value="0"{{ if .User.Rol eq 0 }} selected{{ end }}>Пользователь</option>
+                  <option value="1"{{ if .User.Role }} selected{{ end }}>Администратор</option>
+                  <option value="0"{{ if .User.Role }} {{ else }} selected{{ end }}>Пользователь</option>
                 </select>
             </div>
 
             <div class="form-group"> 
               <label for="password1">Пароль</label> 
-              <input type="password" class="form-control" id="password1" name="password" placeholder="Пароль"> 
+              <input type="password" class="form-control" id="password1" name="password" placeholder="Пароль" value="{{.User.Password}}"> 
             </div> 
             <div class="form-group">
               <label for="password2">Повторите пароль</label> 
-              <input type="password" class="form-control" id="password2" name="repeatPassword" placeholder="Повторите пароль"> 
+              <input type="password" class="form-control" id="password2" name="repeatPassword" placeholder="Повторите пароль" value="{{.User.Password}}"> 
             </div>
             <div class="form-group checkbox">
               <label>
