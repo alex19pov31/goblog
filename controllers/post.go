@@ -38,10 +38,13 @@ func (pc *PostController) Create(rt *helpers.Route) {
 	rt.Request.ParseForm()
 	data := rt.Request.Form
 
+	active, _ := strconv.ParseBool(data.Get("active"))
 	Post := models.Post{
 		Title:      data.Get("title"),
 		Preview:    data.Get("preview"),
-		Text:       data.Get("text")}
+		Code:       data.Get("code"),
+		Text:       data.Get("text"),
+		Active:     active}
 	Post.Save()
 	rt.Data["Post"] = Post
 
@@ -58,15 +61,14 @@ func (pc *PostController) Update(rt *helpers.Route) {
 	rt.Request.ParseForm()
 	data := rt.Request.Form
 
-	active, activeErr := strconv.ParseBool(data.Get("active"))
 	Post, postErr := models.InitPost().FindById(id)
-	helpers.CheckErrors(activeErr, postErr)
+	helpers.CheckErrors(postErr)
 
 	Post.Title = data.Get("title")
 	Post.Preview = data.Get("preview")
 	Post.Code = data.Get("code")
 	Post.Text = data.Get("text")
-	Post.Active = active
+	Post.Active, _ = strconv.ParseBool(data.Get("active"))
 	Post.Save()
 
 	rt.Data["Post"] = Post
@@ -88,4 +90,16 @@ func (pc *PostController) Delete(rt *helpers.Route) {
 func (pc *PostController) Index(rt *helpers.Route) {
 	rt.Data["posts"] = models.InitPost().FindAll(bson.M{})
 	rt.Render("layout", false, "view/admin/layout.html", "view/admin/posts.html")
+}
+
+
+func (pc *PostController) Active(rt *helpers.Route) {
+	id := regexp.MustCompile("/posts/publish/([^/\\?]{24})/?(|\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]
+	Post, postErr := models.InitPost().FindById(id)
+	helpers.CheckErrors(postErr)
+
+	Post.Active = !Post.Active
+	Post.Save()
+
+	rt.Redirect("/admin/posts/", 302)
 }

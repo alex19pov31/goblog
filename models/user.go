@@ -4,6 +4,9 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"time"
 	"golang.org/x/crypto/bcrypt"
+	"net/http"
+	"encoding/json"
+	"crypto"
 )
 
 var userCollection = dbConnect.GetCollection("users")
@@ -20,24 +23,83 @@ type User struct {
 }
 type UserList []User
 
+type Auth struct {
+	login string	`json:"login"`
+	token string	`json:"token"`
+	ttl time.Time	`ttl:"ttl"`
+}
+
 func InitUser() User{
 	return User{}
 }
 
 // Проверка пароля
-func (user *User) CheckPasswod(password, encPassword string) bool {
-	password, err := user.GetPassword(password)
+func CheckPasswod(password, encPassword string) bool {
+	password, err := GetPassword(password)
 	return password == encPassword && err == nil
 }
 
 // Авторизация
-func (user *User) Authorize(login, password string) bool {
+func Login(w http.ResponseWriter, login, password string) (User, bool) {
+	user, err := InitUser().FindOne(bson.M{"login": login})
+	check := err == nil && CheckPasswod(password, user.Password)
 
-	return true
+	if check {
+		setCookie(w, user)
+		return user, true
+	}
+
+	return User{}, false
+}
+
+func AuthorizeByCookie(r http.Request) (User, bool){
+	auth, authErr := getCookie(r)
+	user, userErr := InitUser().FindOne(bson.M{"login": auth.login});
+	userToken := getToken(user, auth.ttl)
+
+	if auth.token == userToken && authErr == nil && userErr == nil {
+		return user, true
+	}
+
+	return User{}, false
+}
+
+func setCookie(w http.ResponseWriter, user User) {
+	ttl := time.Now().Local().Add(time.Hour * 24)
+	tk := getToken(user, ttl)
+	auth := Auth{
+		login: user.Login,
+		token: tk,
+		ttl: ttl,
+	}
+
+	strJSON, _ := json.Marshal(auth)
+	cookie := http.Cookie{
+		Name:"gblock",
+		Value: string(strJSON),
+		Path: "/",
+		Expires: ttl,
+	}
+
+	http.SetCookie(w, &cookie)
+}
+
+func getToken(user User, ttl time.Time) string {
+	return string(crypto.MD5.New().Sum([]byte(user.Login + user.Password + ttl.String())))
+}
+
+func getCookie(r http.Request) (Auth, error){
+	cookie, err := r.Cookie("gblock")
+	auth := Auth{}
+	if err == nil {
+		json.Unmarshal([]byte(cookie.Value), &auth)
+	}
+
+	return auth, err
 }
 
 // Возвращает зашифрованный пароль
-func (user *User) GetPassword(password string) (string, error) {
+func GetPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
 }

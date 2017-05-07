@@ -35,12 +35,14 @@
             </div>
             <div class="form-group checkbox">
               <label>
-                <input type="checkbox" id="active" name="active"{{ if .User.Active }} checked{{ end }}> Активировать
+                <input type="checkbox" id="active" name="active" value="1"{{ if .User.Active }} checked{{ end }}> Активировать
               </label>
             </div>
-            
+
             <button type="submit" class="btn btn-default" name="action" value="save">Сохранить</button>
-            <button type="submit" class="btn btn-default" name="action" value="apply">Применить</button>
+            {{ if .User }}
+                <button type="submit" class="btn btn-default" name="action" value="apply">Применить</button>
+            {{ end }}
         </form> 
     </div>
 <!--

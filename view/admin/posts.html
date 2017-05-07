@@ -30,6 +30,11 @@
             <td>{{ .Created_at }}</td>
             <td>{{ .Updated_at }}</td>
             <td><a href="/admin/posts/{{.GetId}}">Редактировать</a></td>
+            {{ if .Active }}
+              <td><a href="/admin/posts/publish/{{.GetId}}">Снять с публикации</a></td>
+            {{ else }}
+              <td><a href="/admin/posts/publish/{{.GetId}}">Опубликовать</a></td>
+            {{ end }}
             <td><a href="/admin/posts/delete/{{.GetId}}">Удалить</a></td>
           </tr>
         {{end}}

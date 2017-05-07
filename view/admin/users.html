@@ -26,16 +26,17 @@
         </tr>
       </thead>
       <tbody>
-        {{range .posts}}
+        {{range .users}}
           <tr>
+            <td>{{ .GetId }}</td>
             <td>{{ .Login }}</td>
             <td>{{ .Email }}</td>
-            <td>{{ .Role }}</td>
-            <td>{{ .Active }}</td>
+            <td>{{ if .Role }} Админ {{ else }} Пользователь {{ end }}</td>
+            <td>{{ if .Active }} Да {{ else }} Нет {{ end }}</td>
             <td>{{ .Created_at }}</td>
             <td>{{ .Updated_at }}</td>
             <td><a href="/admin/users/{{.GetId}}">Редактировать</a></td>
-            <td><a href="/admin/users/active/{{.GetId}}">Активировать/Деактивировать</a></td>
+            <td><a href="/admin/users/active/{{.GetId}}">{{ if .Active }}Деактивировать{{ else }}Активировать{{ end }}</a></td>
             <td><a href="/admin/users/delete/{{.GetId}}">Удалить</a></td>
           </tr>
         {{end}}

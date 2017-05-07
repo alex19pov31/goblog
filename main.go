@@ -5,7 +5,10 @@ import (
 	"net/http"
 	"testapi/controllers"
 	"testapi/helpers"
+	"testapi/models"
 )
+
+var CurUser models.User
 
 var topMenu = helpers.Menu{
 	{URL: "/admin/", Text: "Админка"},
@@ -39,6 +42,8 @@ func main() {
 }
 
 func startAdminRoute(w http.ResponseWriter, r *http.Request) {
+	//Authorize(w,r)
+
 	topMenu.UpdateMenu(r.RequestURI)
 	leftMenu.UpdateMenu(r.RequestURI)
 	route := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}
@@ -59,6 +64,7 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 func postsRoute(route *helpers.Route) {
 	cnt := controllers.NewPostController()
 
+	route.Get("/posts/publish/[^/\\?]{24}/?(|\\?.*)$", cnt.Active)
 	route.Get("/posts/delete/[^/\\?]{24}/?(|\\?.*)$", cnt.Delete)
 	route.Get("/posts/new/?(|\\?.*)$", cnt.New)
 	route.Post("/posts/new/?(|\\?.*)$", cnt.Create)
@@ -85,4 +91,14 @@ func startMainRoute(w http.ResponseWriter, r *http.Request) {
 	rtMain.Get("/(|\\?.*)$", func(rt *helpers.Route) {
 		rt.Render("layout", false, "view/main/layout.html", "view/main/index.html")
 	})
+}
+
+func Authorize(w http.ResponseWriter, r *http.Request) {
+	user, isAuth := models.AuthorizeByCookie(*r)
+	CurUser = user
+
+	if isAuth == false && r.RequestURI != "/admin/login" {
+		log.Println(isAuth)
+		http.Redirect(w, r, "/admin/login", 302)
+	}
 }
