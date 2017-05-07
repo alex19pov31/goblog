@@ -9,6 +9,7 @@ import (
 )
 
 var CurUser models.User
+var isAuthorize bool
 
 var topMenu = helpers.Menu{
 	{URL: "/admin/", Text: "Админка"},
@@ -42,11 +43,16 @@ func main() {
 }
 
 func startAdminRoute(w http.ResponseWriter, r *http.Request) {
-	//Authorize(w,r)
+	Authorize(w,r)
 
 	topMenu.UpdateMenu(r.RequestURI)
 	leftMenu.UpdateMenu(r.RequestURI)
 	route := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}
+
+	if isAuthorize && CurUser.Role == 0 {
+		route.NotFound("layout", "view/admin/layout.html", "view/admin/403.html")
+		return
+	}
 
 	postsRoute(&route)
 	usersRoute(&route)
@@ -76,6 +82,7 @@ func postsRoute(route *helpers.Route) {
 func usersRoute(route *helpers.Route) {
 	cnt := controllers.NewUserController()
 
+	route.Post("/login/?(|\\?.*)$", cnt.Login)
 	route.Get("/users/new?(|\\?.*)$", cnt.New)
 	route.Post("/users/new?(|\\?.*)$", cnt.Create)
 	route.Get("/users/[^/\\?]{24}/?(|\\?.*)$", cnt.Get)
@@ -94,11 +101,11 @@ func startMainRoute(w http.ResponseWriter, r *http.Request) {
 }
 
 func Authorize(w http.ResponseWriter, r *http.Request) {
-	user, isAuth := models.AuthorizeByCookie(*r)
+	user, isAuth := models.AuthorizeByCookie(r)
+	isAuthorize = isAuth
 	CurUser = user
 
 	if isAuth == false && r.RequestURI != "/admin/login" {
-		log.Println(isAuth)
 		http.Redirect(w, r, "/admin/login", 302)
 	}
 }

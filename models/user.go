@@ -6,7 +6,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"encoding/json"
-	"crypto"
+	"encoding/base64"
+	"crypto/md5"
+	"encoding/hex"
 )
 
 var userCollection = dbConnect.GetCollection("users")
@@ -24,9 +26,9 @@ type User struct {
 type UserList []User
 
 type Auth struct {
-	login string	`json:"login"`
-	token string	`json:"token"`
-	ttl time.Time	`ttl:"ttl"`
+	Login string	`json:"login"`
+	Token string	`json:"token"`
+	TTL time.Time	`json:"ttl"`
 }
 
 func InitUser() User{
@@ -35,8 +37,7 @@ func InitUser() User{
 
 // Проверка пароля
 func CheckPasswod(password, encPassword string) bool {
-	password, err := GetPassword(password)
-	return password == encPassword && err == nil
+	return bcrypt.CompareHashAndPassword([]byte(encPassword), []byte(password)) == nil
 }
 
 // Авторизация
@@ -52,12 +53,17 @@ func Login(w http.ResponseWriter, login, password string) (User, bool) {
 	return User{}, false
 }
 
-func AuthorizeByCookie(r http.Request) (User, bool){
+func AuthorizeByCookie(r *http.Request) (User, bool){
 	auth, authErr := getCookie(r)
-	user, userErr := InitUser().FindOne(bson.M{"login": auth.login});
-	userToken := getToken(user, auth.ttl)
+	user, userErr := InitUser().FindOne(bson.M{"login": auth.Login});
 
-	if auth.token == userToken && authErr == nil && userErr == nil {
+	if authErr != nil && userErr != nil {
+		return User{}, false
+	}
+
+	userToken := getToken(user, auth.TTL)
+
+	if auth.Token == userToken{
 		return user, true
 	}
 
@@ -66,17 +72,18 @@ func AuthorizeByCookie(r http.Request) (User, bool){
 
 func setCookie(w http.ResponseWriter, user User) {
 	ttl := time.Now().Local().Add(time.Hour * 24)
-	tk := getToken(user, ttl)
+	//tk := getToken(user, ttl)
 	auth := Auth{
-		login: user.Login,
-		token: tk,
-		ttl: ttl,
+		Login: user.Login,
+		Token: getToken(user, ttl),
+		TTL: ttl,
 	}
 
 	strJSON, _ := json.Marshal(auth)
+	cookieVal := base64.StdEncoding.EncodeToString(strJSON)
 	cookie := http.Cookie{
 		Name:"gblock",
-		Value: string(strJSON),
+		Value: cookieVal,
 		Path: "/",
 		Expires: ttl,
 	}
@@ -85,15 +92,27 @@ func setCookie(w http.ResponseWriter, user User) {
 }
 
 func getToken(user User, ttl time.Time) string {
-	return string(crypto.MD5.New().Sum([]byte(user.Login + user.Password + ttl.String())))
+	str := user.Login + user.Password + ttl.String()
+	hasher := md5.New()
+	hasher.Write([]byte(str))
+
+	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func getCookie(r http.Request) (Auth, error){
+func getCookie(r *http.Request) (Auth, error){
 	cookie, err := r.Cookie("gblock")
 	auth := Auth{}
-	if err == nil {
-		json.Unmarshal([]byte(cookie.Value), &auth)
+	if err != nil {
+		return auth, err
 	}
+
+	cookieVal, decodeErr := base64.StdEncoding.DecodeString(cookie.Value)
+
+	if decodeErr != nil {
+		return auth, decodeErr
+	}
+
+	json.Unmarshal(cookieVal, &auth)
 
 	return auth, err
 }

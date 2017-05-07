@@ -106,6 +106,15 @@ func (pc *UserController) Index(rt *helpers.Route) {
 	rt.Render("layout", false, "view/admin/layout.html", "view/admin/users.html")
 }
 
+func (pc *UserController) Login(rt *helpers.Route) {
+	rt.Request.ParseForm()
+	data := rt.Request.Form
+
+	models.Login(rt.Response, data.Get("login"), data.Get("password"))
+
+	rt.Redirect("/admin/", 302)
+}
+
 func (pc *UserController) setPassword(data url.Values, user *models.User) {
 	password1 := data.Get("password")
 	password2 := data.Get("repeatPassword")
