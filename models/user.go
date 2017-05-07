@@ -53,6 +53,10 @@ func Login(w http.ResponseWriter, login, password string) (User, bool) {
 	return User{}, false
 }
 
+func Logout(w http.ResponseWriter){
+	setCookie(w, User{Login:"false", Password: "false"})
+}
+
 func AuthorizeByCookie(r *http.Request) (User, bool){
 	auth, authErr := getCookie(r)
 	user, userErr := InitUser().FindOne(bson.M{"login": auth.Login});

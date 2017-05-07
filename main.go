@@ -60,8 +60,13 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 	route.Get("/(|\\?.*)$", func(route *helpers.Route) {
 		route.Render("layout", false, "view/admin/layout.html", "view/admin/index.html")
 	})
+
 	route.Get("/login/?(|\\?.*)$", func(route *helpers.Route) {
-		route.Render("layout", false, "view/admin/login.html")
+		if isAuthorize == false {
+			route.Render("layout", false, "view/admin/login.html")
+		} else {
+			route.Redirect("/admin/", 302)
+		}
 	})
 
 	route.NotFound("layout", "view/admin/layout.html", "view/admin/404.html")
@@ -83,6 +88,7 @@ func usersRoute(route *helpers.Route) {
 	cnt := controllers.NewUserController()
 
 	route.Post("/login/?(|\\?.*)$", cnt.Login)
+	route.Get("/logout/?(|\\?.*)$", cnt.Logout)
 	route.Get("/users/new?(|\\?.*)$", cnt.New)
 	route.Post("/users/new?(|\\?.*)$", cnt.Create)
 	route.Get("/users/[^/\\?]{24}/?(|\\?.*)$", cnt.Get)

@@ -115,6 +115,11 @@ func (pc *UserController) Login(rt *helpers.Route) {
 	rt.Redirect("/admin/", 302)
 }
 
+func (pc *UserController) Logout(rt *helpers.Route) {
+	models.Logout(rt.Response)
+	rt.Redirect("/admin/", 302)
+}
+
 func (pc *UserController) setPassword(data url.Values, user *models.User) {
 	password1 := data.Get("password")
 	password2 := data.Get("repeatPassword")
