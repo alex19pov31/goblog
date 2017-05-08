@@ -4,9 +4,9 @@ import (
 	"gopkg.in/mgo.v2/bson"
 	"regexp"
 	"strconv"
-	"testapi/helpers"
-	"testapi/models"
 	"net/url"
+	"../helpers"
+	"../models"
 )
 
 type UserController struct {

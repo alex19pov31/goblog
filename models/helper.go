@@ -1,7 +1,7 @@
 package models
 
 import (
-	"testapi/helpers"
+	"../helpers"
 )
 
 var dbConnect = helpers.DB{

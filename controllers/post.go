@@ -3,10 +3,10 @@ package controllers
 import (
 	"gopkg.in/mgo.v2/bson"
 	"regexp"
-	"testapi/helpers"
-	"testapi/models"
 	"log"
 	"strconv"
+	"../helpers"
+	"../models"
 )
 
 type PostController struct {

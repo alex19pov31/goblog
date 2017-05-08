@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
-	"testapi/controllers"
-	"testapi/helpers"
-	"testapi/models"
+	"./controllers"
+	"./helpers"
+	"./models"
 )
 
 var CurUser models.User
@@ -29,7 +29,7 @@ func main() {
 	publicAdmin := http.FileServer(http.Dir("./public"))
 	themeAdmin := http.FileServer(http.Dir("./themes/basic-dashboard"))
 	public := http.FileServer(http.Dir("./public"))
-	theme := http.FileServer(http.Dir("./themes/startbootstrap-blog-post"))
+	theme := http.FileServer(http.Dir("./themes/startbootstrap-blog"))
 
 	go http.Handle("/admin/theme/", http.StripPrefix("/admin/theme/", themeAdmin))
 	go http.Handle("/admin/public/", http.StripPrefix("/admin/public/", publicAdmin))
