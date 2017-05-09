@@ -10,19 +10,26 @@ import (
 type Data map[string]interface{}
 
 type Route struct {
-	BaseURI  string
-	Checked  bool
-	Data     Data
-	Tpl      []string
-	Pattern  string
-	Request  *http.Request
-	Response http.ResponseWriter
+	BaseURI    string
+	Checked    bool
+	Data       Data
+	Tpl        []string
+	Pattern    string
+	Request    *http.Request
+	Response   http.ResponseWriter
+	credential Credential
+}
+
+type Credential struct {
+	on bool
+	isAllow bool
 }
 
 func (rt *Route) Route(method string, Pattern string, handler func(route *Route)) {
 	if rt.Checked != true && rt.Request.Method == method && rt.CheckRegexp(Pattern) || method == "ANY" && rt.CheckRegexp(Pattern) {
 		handler(rt)
 	}
+	rt.flashCredential()
 }
 func (rt *Route) Get(Pattern string, handler func(route *Route)) {
 	rt.Route("GET", Pattern, handler)
@@ -48,7 +55,7 @@ func (rt *Route) Redirect(url string, code int) {
 }
 
 func (rt *Route) CheckRegexp(Pattern string) bool {
-	if rt.Checked == true {
+	if rt.Checked == true || rt.credential.on && rt.credential.isAllow == false {
 		return false
 	}
 	if rt.BaseURI != "" && len(rt.BaseURI) > 0 {
@@ -70,4 +77,15 @@ func (rt *Route) Render(layout string, Data interface{}, Tpl ...string) {
 	if err := t.ExecuteTemplate(rt.Response, layout, Data); err != nil {
 		log.Println(err)
 	}
+}
+
+func (rt *Route) Credential(allow bool) *Route {
+	rt.credential.on = true
+	rt.credential.isAllow = allow
+
+	return rt
+}
+
+func (rt *Route) flashCredential() {
+	rt.credential.on = false
 }

@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"goblog/helpers"
+	"goblog/models"
 	"gopkg.in/mgo.v2/bson"
+	"net/url"
 	"regexp"
 	"strconv"
-	"net/url"
-	"../helpers"
-	"../models"
 )
 
 type UserController struct {
@@ -41,10 +41,10 @@ func (pc *UserController) Create(rt *helpers.Route) {
 	role, _ := strconv.Atoi(data.Get("role"))
 
 	User := models.User{
-		Login:      data.Get("login"),
-		Email:      data.Get("email"),
-		Role:       role,
-		Active:     active}
+		Login:  data.Get("login"),
+		Email:  data.Get("email"),
+		Role:   role,
+		Active: active}
 	pc.setPassword(data, &User)
 
 	User.Save()
@@ -125,7 +125,7 @@ func (pc *UserController) setPassword(data url.Values, user *models.User) {
 	password2 := data.Get("repeatPassword")
 
 	if password1 != "" && password1 == password2 && len(password1) > 6 {
-		password, passErr := models.GetPassword( password1 )
+		password, passErr := models.GetPassword(password1)
 		if passErr == nil {
 			user.Password = password
 		}

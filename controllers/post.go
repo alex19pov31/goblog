@@ -1,12 +1,12 @@
 package controllers
 
 import (
+	"goblog/helpers"
+	"goblog/models"
 	"gopkg.in/mgo.v2/bson"
-	"regexp"
 	"log"
+	"regexp"
 	"strconv"
-	"../helpers"
-	"../models"
 )
 
 type PostController struct {
@@ -40,11 +40,11 @@ func (pc *PostController) Create(rt *helpers.Route) {
 
 	active, _ := strconv.ParseBool(data.Get("active"))
 	Post := models.Post{
-		Title:      data.Get("title"),
-		Preview:    data.Get("preview"),
-		Code:       data.Get("code"),
-		Text:       data.Get("text"),
-		Active:     active}
+		Title:   data.Get("title"),
+		Preview: data.Get("preview"),
+		Code:    data.Get("code"),
+		Text:    data.Get("text"),
+		Active:  active}
 	Post.Save()
 	rt.Data["Post"] = Post
 
@@ -91,7 +91,6 @@ func (pc *PostController) Index(rt *helpers.Route) {
 	rt.Data["posts"] = models.InitPost().FindAll(bson.M{})
 	rt.Render("layout", false, "view/admin/layout.html", "view/admin/posts.html")
 }
-
 
 func (pc *PostController) Active(rt *helpers.Route) {
 	id := regexp.MustCompile("/posts/publish/([^/\\?]{24})/?(|\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]

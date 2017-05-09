@@ -1,11 +1,11 @@
 package main
 
 import (
+	"goblog/controllers"
+	"goblog/helpers"
+	"goblog/models"
 	"log"
 	"net/http"
-	"./controllers"
-	"./helpers"
-	"./models"
 )
 
 var CurUser models.User
@@ -43,21 +43,16 @@ func main() {
 }
 
 func startAdminRoute(w http.ResponseWriter, r *http.Request) {
-	Authorize(w,r)
+	Authorize(w, r)
 
 	topMenu.UpdateMenu(r.RequestURI)
 	leftMenu.UpdateMenu(r.RequestURI)
 	route := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}
 
-	if isAuthorize && CurUser.Role == 0 {
-		route.NotFound("layout", "view/admin/layout.html", "view/admin/403.html")
-		return
-	}
-
 	postsRoute(&route)
 	usersRoute(&route)
 
-	route.Get("/(|\\?.*)$", func(route *helpers.Route) {
+	route.Credential(CurUser.Role == 1).Get("/(|\\?.*)$", func(route *helpers.Route) {
 		route.Render("layout", false, "view/admin/layout.html", "view/admin/index.html")
 	})
 
@@ -74,28 +69,30 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 
 func postsRoute(route *helpers.Route) {
 	cnt := controllers.NewPostController()
+	allowRule := CurUser.Role == 1
 
-	route.Get("/posts/publish/[^/\\?]{24}/?(|\\?.*)$", cnt.Active)
-	route.Get("/posts/delete/[^/\\?]{24}/?(|\\?.*)$", cnt.Delete)
-	route.Get("/posts/new/?(|\\?.*)$", cnt.New)
-	route.Post("/posts/new/?(|\\?.*)$", cnt.Create)
-	route.Get("/posts/[^/\\?]{24}/?(|\\?.*)$", cnt.Get)
-	route.Post("/posts/[^/\\?]{24}/?(|\\?.*)$", cnt.Update)
-	route.Get("/posts/?(|\\?.*)$", cnt.Index)
+	route.Credential(allowRule).Get("/posts/publish/[^/\\?]{24}/?(|\\?.*)$", cnt.Active)
+	route.Credential(allowRule).Get("/posts/delete/[^/\\?]{24}/?(|\\?.*)$", cnt.Delete)
+	route.Credential(allowRule).Get("/posts/new/?(|\\?.*)$", cnt.New)
+	route.Credential(allowRule).Post("/posts/new/?(|\\?.*)$", cnt.Create)
+	route.Credential(allowRule).Get("/posts/[^/\\?]{24}/?(|\\?.*)$", cnt.Get)
+	route.Credential(allowRule).Post("/posts/[^/\\?]{24}/?(|\\?.*)$", cnt.Update)
+	route.Credential(allowRule).Get("/posts/?(|\\?.*)$", cnt.Index)
 }
 
 func usersRoute(route *helpers.Route) {
 	cnt := controllers.NewUserController()
+	allowRule := CurUser.Role == 1
 
 	route.Post("/login/?(|\\?.*)$", cnt.Login)
 	route.Get("/logout/?(|\\?.*)$", cnt.Logout)
-	route.Get("/users/new?(|\\?.*)$", cnt.New)
-	route.Post("/users/new?(|\\?.*)$", cnt.Create)
-	route.Get("/users/[^/\\?]{24}/?(|\\?.*)$", cnt.Get)
-	route.Post("/users/[^/\\?]{24}/?(|\\?.*)$", cnt.Update)
-	route.Get("/users/delete/[^/\\?]{24}/?(|\\?.*)$", cnt.Delete)
-	route.Get("/users/active/[^/\\?]{24}/?(|\\?.*)$", cnt.Active)
-	route.Get("/users/?(|\\?.*)$", cnt.Index)
+	route.Credential(allowRule).Get("/users/new?(|\\?.*)$", cnt.New)
+	route.Credential(allowRule).Post("/users/new?(|\\?.*)$", cnt.Create)
+	route.Credential(allowRule).Get("/users/[^/\\?]{24}/?(|\\?.*)$", cnt.Get)
+	route.Credential(allowRule).Post("/users/[^/\\?]{24}/?(|\\?.*)$", cnt.Update)
+	route.Credential(allowRule).Get("/users/delete/[^/\\?]{24}/?(|\\?.*)$", cnt.Delete)
+	route.Credential(allowRule).Get("/users/active/[^/\\?]{24}/?(|\\?.*)$", cnt.Active)
+	route.Credential(allowRule).Get("/users/?(|\\?.*)$", cnt.Index)
 }
 
 func startMainRoute(w http.ResponseWriter, r *http.Request) {
