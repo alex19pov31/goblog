@@ -49,6 +49,8 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 	leftMenu.UpdateMenu(r.RequestURI)
 	route := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}
 
+	defer route.NotFound("layout", "view/admin/layout.html", "view/admin/404.html")
+
 	postsRoute(&route)
 	usersRoute(&route)
 
@@ -63,8 +65,6 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 			route.Redirect("/admin/", 302)
 		}
 	})
-
-	route.NotFound("layout", "view/admin/layout.html", "view/admin/404.html")
 }
 
 func postsRoute(route *helpers.Route) {
@@ -97,8 +97,11 @@ func usersRoute(route *helpers.Route) {
 
 func startMainRoute(w http.ResponseWriter, r *http.Request) {
 
-	rtMain := helpers.Route{BaseURI: "", Request: r, Response: w}
-	rtMain.Get("/(|\\?.*)$", func(rt *helpers.Route) {
+	route := helpers.Route{BaseURI: "", Request: r, Response: w}
+
+	defer route.NotFound("layout", "view/main/layout.html", "view/main/404.html")
+
+	route.Get("/(|\\?.*)$", func(rt *helpers.Route) {
 		rt.Render("layout", false, "view/main/layout.html", "view/main/index.html")
 	})
 }
