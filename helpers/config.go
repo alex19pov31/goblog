@@ -24,6 +24,7 @@ func (conf Config) Get(name string) string {
 
 func (conf *Config) read() {
 	f, err := os.Open(conf.path)
+	defer f.Close()
 
 	if err != nil {
 		return
