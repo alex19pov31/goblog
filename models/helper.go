@@ -4,9 +4,11 @@ import (
 	"goblog/helpers"
 )
 
+var Config = helpers.LoadConfig("config.json")
+
 var dbConnect = helpers.DB{
-	Host:   "localhost",
-	DBname: "testdb",
+	Host:   Config.DBHost,
+	DBname: Config.DBName,
 }
 
 /*
