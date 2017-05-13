@@ -1,5 +1,7 @@
 {{define "body"}}
 
+    <link rel="stylesheet" href="//bootstrap-tagsinput.github.io/bootstrap-tagsinput/dist/bootstrap-tagsinput.css">
+
     {{if .Post }}
         <h1>Редактирование статьи</h1>
     {{else}}
@@ -12,9 +14,9 @@
                 <label for="Title">Заголовок</label> 
                 <input type="text" class="form-control" id="Title" placeholder="Заголовок" autocomplete="off" name="title" value="{{.Post.Title}}"> 
             </div>
-            <div class="form-group"> 
-                <label for="code">Символьный код</label> 
-                <input type="text" class="form-control" id="code" placeholder="Символьный код" autocomplete="off" name="code" value="{{.Post.Code}}"> 
+            <div class="form-group">
+                <label for="code">Символьный код</label>
+                <input type="text" class="form-control" id="code" placeholder="Символьный код" autocomplete="off" name="code" value="{{.Post.Code}}">
             </div>
             <div class="form-group checkbox">
               <label>
@@ -28,6 +30,10 @@
             <div class="form-group">
               <label for="text">Текст статьи</label> 
               <textarea class="form-control" name="text" id="text" rows="4" >{{.Post.Text}}</textarea>
+            </div>
+
+            <div class="form-group">
+                <input type="text" class="form-control" id="tags" data-role="tagsinput" placeholder="Тэги" autocomplete="off" name="tags" value="{{ .Post.Tags | .Post.GetTags }}">
             </div>
             
             <button type="submit" class="btn btn-default" name="action" value="save">Сохранить</button>

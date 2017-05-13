@@ -47,7 +47,15 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 
 	topMenu.UpdateMenu(r.RequestURI)
 	leftMenu.UpdateMenu(r.RequestURI)
-	route := helpers.Route{BaseURI: "/admin", Request: r, Response: w, Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu}}
+	route := helpers.Route{
+		BaseURI: "/admin",
+		Request: r,
+		Response: w,
+		TemplatePath: "view/admin/",
+		BaseTemplate: "layout.html",
+		BaseLayout: "layout",
+		Data: helpers.Data{"tmenu": topMenu, "lmenu": leftMenu},
+	}
 
 	defer route.NotFound("layout", "view/admin/layout.html", "view/admin/404.html")
 
@@ -75,9 +83,9 @@ func postsRoute(route *helpers.Route) {
 	route.Credential(allowRule).Get("/posts/delete/[^/\\?]{24}/?(|\\?.*)$", cnt.Delete)
 	route.Credential(allowRule).Get("/posts/new/?(|\\?.*)$", cnt.New)
 	route.Credential(allowRule).Post("/posts/new/?(|\\?.*)$", cnt.Create)
-	route.Credential(allowRule).Get("/posts/[^/\\?]{24}/?(|\\?.*)$", cnt.Get)
+	route.Credential(allowRule).Get("/posts/[^/\\?]{24}(/?|\\.json|/?\\?.*)$", cnt.Get)
 	route.Credential(allowRule).Post("/posts/[^/\\?]{24}/?(|\\?.*)$", cnt.Update)
-	route.Credential(allowRule).Get("/posts/?(|\\?.*)$", cnt.Index)
+	route.Credential(allowRule).Get("/posts(/?|\\.json|/?\\?.*)$", cnt.Index)
 }
 
 func usersRoute(route *helpers.Route) {

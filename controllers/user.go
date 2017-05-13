@@ -23,15 +23,14 @@ func (pc *UserController) Get(rt *helpers.Route) {
 	rt.Data["User"] = user
 
 	if err != nil {
-		//rt.Redirect("/admin/posts", 302)
-		rt.Render("layout", false, "view/admin/layout.html", "view/admin/404.html")
+		rt.Show("404.html", false, "")
 	} else {
-		rt.Render("layout", false, "view/admin/layout.html", "view/admin/user.html")
+		rt.Show("user.html", false, "")
 	}
 }
 
 func (pc *UserController) New(rt *helpers.Route) {
-	rt.Render("layout", false, "view/admin/layout.html", "view/admin/user.html")
+	rt.Show("user.html", false, "")
 }
 
 func (pc *UserController) Create(rt *helpers.Route) {
@@ -53,7 +52,7 @@ func (pc *UserController) Create(rt *helpers.Route) {
 	if data.Get("action") == "save" {
 		rt.Redirect("/admin/users/"+User.Id.Hex(), 302)
 	} else {
-		rt.Render("layout", false, "view/admin/layout.html", "view/admin/user.html")
+		rt.Show("user.html", false, "")
 	}
 }
 
@@ -80,7 +79,7 @@ func (pc *UserController) Update(rt *helpers.Route) {
 	if data.Get("action") == "save" {
 		rt.Redirect("/admin/users/", 302)
 	} else {
-		rt.Render("layout", false, "view/admin/layout.html", "view/admin/user.html")
+		rt.Show("user.html", false, "")
 	}
 }
 
@@ -103,7 +102,7 @@ func (pc *UserController) Active(rt *helpers.Route) {
 
 func (pc *UserController) Index(rt *helpers.Route) {
 	rt.Data["users"] = models.InitUser().FindAll(bson.M{})
-	rt.Render("layout", false, "view/admin/layout.html", "view/admin/users.html")
+	rt.Show("users.html", false, "")
 }
 
 func (pc *UserController) Login(rt *helpers.Route) {

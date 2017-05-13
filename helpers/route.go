@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"encoding/json"
 )
 
 type Data map[string]interface{}
@@ -17,6 +18,9 @@ type Route struct {
 	Pattern    string
 	Request    *http.Request
 	Response   http.ResponseWriter
+	TemplatePath string
+	BaseTemplate string
+	BaseLayout   string
 	credential Credential
 }
 
@@ -79,6 +83,19 @@ func (rt *Route) Render(layout string, Data interface{}, Tpl ...string) {
 	}
 }
 
+func (rt *Route) Show(tpl string, data interface{}, format string){
+	if rt.TemplatePath == "" || rt.BaseTemplate == "" || rt.BaseLayout == "" {
+		return
+	}
+
+	if(format == ".json") {
+		rt.Response.Header().Set("Content-Type", "application/json; charset=utf-8")
+		rt.Response.Write(GetJson(data))
+	} else{
+		rt.Render(rt.BaseLayout, data, rt.TemplatePath + rt.BaseTemplate, rt.TemplatePath + tpl)
+	}
+}
+
 func (rt *Route) Credential(allow bool) *Route {
 	rt.credential.on = true
 	rt.credential.isAllow = allow
@@ -88,4 +105,13 @@ func (rt *Route) Credential(allow bool) *Route {
 
 func (rt *Route) flashCredential() {
 	rt.credential.on = false
+}
+
+func GetJson(model interface{}) []byte {
+	json, err := json.Marshal(model)
+	if err != nil {
+		return []byte{}
+	}
+
+	return json
 }

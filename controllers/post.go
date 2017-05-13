@@ -18,20 +18,27 @@ func NewPostController() *PostController {
 }
 
 func (pc *PostController) Get(rt *helpers.Route) {
-	id := regexp.MustCompile("/posts/([^/\\?]{24})/?(|\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]
+	preg := regexp.MustCompile("/posts/([^/\\?]{24})(/?|\\.json|/?\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)
+	id := preg[1]
+	format := preg[2]
+
 	Post, err := models.InitPost().FindById(id)
 	rt.Data["Post"] = Post
 
 	if err != nil {
-		//rt.Redirect("/admin/posts", 302)
-		rt.Render("layout", false, "view/admin/layout.html", "view/admin/404.html")
+		rt.Show("404.html", false, "html")
 	} else {
-		rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
+		if format == ".json" {
+			rt.Show("post.html", Post, format)
+		} else {
+			rt.Show("post.html", false, format)
+		}
+
 	}
 }
 
 func (pc *PostController) New(rt *helpers.Route) {
-	rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
+	rt.Show("post.html", false, "")
 }
 
 func (pc *PostController) Create(rt *helpers.Route) {
@@ -51,7 +58,7 @@ func (pc *PostController) Create(rt *helpers.Route) {
 	if data.Get("action") == "save" {
 		rt.Redirect("/admin/posts/"+Post.Id.Hex(), 302)
 	} else {
-		rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
+		rt.Show("post.html", false, "")
 	}
 }
 
@@ -68,6 +75,7 @@ func (pc *PostController) Update(rt *helpers.Route) {
 	Post.Preview = data.Get("preview")
 	Post.Code = data.Get("code")
 	Post.Text = data.Get("text")
+	Post.Tags = data["tags"]
 	Post.Active, _ = strconv.ParseBool(data.Get("active"))
 	Post.Save()
 
@@ -76,7 +84,7 @@ func (pc *PostController) Update(rt *helpers.Route) {
 	if data.Get("action") == "save" {
 		rt.Redirect("/admin/posts/", 302)
 	} else {
-		rt.Render("layout", false, "view/admin/layout.html", "view/admin/post.html")
+		rt.Show("post.html", false, "")
 	}
 }
 
@@ -88,8 +96,14 @@ func (pc *PostController) Delete(rt *helpers.Route) {
 }
 
 func (pc *PostController) Index(rt *helpers.Route) {
+	format := regexp.MustCompile("/posts(/?|\\.json|/?\\?.*)$").FindStringSubmatch(rt.Request.RequestURI)[1]
 	rt.Data["posts"] = models.InitPost().FindAll(bson.M{})
-	rt.Render("layout", false, "view/admin/layout.html", "view/admin/posts.html")
+
+	if format == ".json" {
+		rt.Show("posts.html", rt.Data["posts"], format)
+	} else {
+		rt.Show("posts.html", false, format)
+	}
 }
 
 func (pc *PostController) Active(rt *helpers.Route) {
