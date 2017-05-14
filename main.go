@@ -56,13 +56,13 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 		Data:         helpers.Data{"tmenu": topMenu, "lmenu": leftMenu},
 	}
 
-	defer route.NotFound("layout", "view/admin/layout.html", "view/admin/404.html")
+	defer route.Show("404.html", false, "html")
 
 	postsRoute(&route)
 	usersRoute(&route)
 
 	route.Credential(models.CurUser.Role == 1).Get("/(|\\?.*)$", func(route *helpers.Route) {
-		route.Render("layout", false, "view/admin/layout.html", "view/admin/index.html")
+		route.Show("index.html", false, "html")
 	})
 
 	route.Get("/login/?(|\\?.*)$", func(route *helpers.Route) {
@@ -104,12 +104,20 @@ func usersRoute(route *helpers.Route) {
 
 func startMainRoute(w http.ResponseWriter, r *http.Request) {
 
-	route := helpers.Route{BaseURI: "", Request: r, Response: w}
+	route := helpers.Route{
+		BaseURI:      "/",
+		Request:      r,
+		Response:     w,
+		TemplatePath: "view/main/",
+		BaseTemplate: "layout.html",
+		BaseLayout:   "layout",
+		Data:         helpers.Data{},
+	}
 
-	defer route.NotFound("layout", "view/main/layout.html", "view/main/404.html")
+	defer route.Show("404.html", false, "html")
 
-	route.Get("/(|\\?.*)$", func(rt *helpers.Route) {
-		rt.Render("layout", false, "view/main/layout.html", "view/main/index.html")
+	route.Get("/?(|\\?.*)$", func(rt *helpers.Route) {
+		route.Show("index.html", false, "html")
 	})
 }
 
