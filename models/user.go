@@ -1,17 +1,18 @@
 package models
 
 import (
-	"gopkg.in/mgo.v2/bson"
-	"time"
-	"golang.org/x/crypto/bcrypt"
-	"net/http"
-	"encoding/json"
-	"encoding/base64"
 	"crypto/md5"
+	"encoding/base64"
 	"encoding/hex"
+	"encoding/json"
+	"golang.org/x/crypto/bcrypt"
+	"gopkg.in/mgo.v2/bson"
+	"net/http"
+	"time"
 )
 
 var userCollection = dbConnect.GetCollection("users")
+var CurUser User
 
 type User struct {
 	Id         bson.ObjectId `bson:"_id,omitempty"`
@@ -26,12 +27,12 @@ type User struct {
 type UserList []User
 
 type Auth struct {
-	Login string	`json:"login"`
-	Token string	`json:"token"`
-	TTL time.Time	`json:"ttl"`
+	Login string    `json:"login"`
+	Token string    `json:"token"`
+	TTL   time.Time `json:"ttl"`
 }
 
-func InitUser() User{
+func InitUser() User {
 	return User{}
 }
 
@@ -53,21 +54,21 @@ func Login(w http.ResponseWriter, login, password string) (User, bool) {
 	return User{}, false
 }
 
-func Logout(w http.ResponseWriter){
-	setCookie(w, User{Login:"false", Password: "false"})
+func Logout(w http.ResponseWriter) {
+	setCookie(w, User{Login: "false", Password: "false"})
 }
 
-func AuthorizeByCookie(r *http.Request) (User, bool){
+func AuthorizeByCookie(r *http.Request) (User, bool) {
 	auth, authErr := getCookie(r)
-	user, userErr := InitUser().FindOne(bson.M{"login": auth.Login});
+	user, userErr := InitUser().FindOne(bson.M{"login": auth.Login})
 
-	if authErr != nil && userErr != nil {
+	if authErr != nil && userErr != nil || user.Active == false {
 		return User{}, false
 	}
 
 	userToken := getToken(user, auth.TTL)
 
-	if auth.Token == userToken{
+	if auth.Token == userToken {
 		return user, true
 	}
 
@@ -80,15 +81,15 @@ func setCookie(w http.ResponseWriter, user User) {
 	auth := Auth{
 		Login: user.Login,
 		Token: getToken(user, ttl),
-		TTL: ttl,
+		TTL:   ttl,
 	}
 
 	strJSON, _ := json.Marshal(auth)
 	cookieVal := base64.StdEncoding.EncodeToString(strJSON)
 	cookie := http.Cookie{
-		Name:"gblock",
-		Value: cookieVal,
-		Path: "/",
+		Name:    "gblock",
+		Value:   cookieVal,
+		Path:    "/",
 		Expires: ttl,
 	}
 
@@ -103,7 +104,7 @@ func getToken(user User, ttl time.Time) string {
 	return hex.EncodeToString(hasher.Sum(nil))
 }
 
-func getCookie(r *http.Request) (Auth, error){
+func getCookie(r *http.Request) (Auth, error) {
 	cookie, err := r.Cookie("gblock")
 	auth := Auth{}
 	if err != nil {
@@ -148,7 +149,7 @@ func (user User) FindOne(query bson.M) (User, error) {
 	return user, err
 }
 
-func (user User) FindById(id string) (User, error)  {
+func (user User) FindById(id string) (User, error) {
 	err := userCollection.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&user)
 
 	return user, err
@@ -164,7 +165,7 @@ func (user User) FindAll(query bson.M) UserList {
 func (user User) Delete() error {
 	err := userCollection.Remove(bson.M{"_id": user.Id})
 
-	return  err
+	return err
 }
 
 func (user User) DeleteByQuery(query bson.M) error {

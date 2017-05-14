@@ -1,31 +1,31 @@
 package helpers
 
 import (
+	"encoding/json"
 	"html/template"
 	"log"
 	"net/http"
 	"regexp"
-	"encoding/json"
 )
 
 type Data map[string]interface{}
 
 type Route struct {
-	BaseURI    string
-	Checked    bool
-	Data       Data
-	Tpl        []string
-	Pattern    string
-	Request    *http.Request
-	Response   http.ResponseWriter
+	BaseURI      string
+	Checked      bool
+	Data         Data
+	Tpl          []string
+	Pattern      string
+	Request      *http.Request
+	Response     http.ResponseWriter
 	TemplatePath string
 	BaseTemplate string
 	BaseLayout   string
-	credential Credential
+	credential   Credential
 }
 
 type Credential struct {
-	on bool
+	on      bool
 	isAllow bool
 }
 
@@ -83,16 +83,16 @@ func (rt *Route) Render(layout string, Data interface{}, Tpl ...string) {
 	}
 }
 
-func (rt *Route) Show(tpl string, data interface{}, format string){
+func (rt *Route) Show(tpl string, data interface{}, format string) {
 	if rt.TemplatePath == "" || rt.BaseTemplate == "" || rt.BaseLayout == "" {
 		return
 	}
 
-	if(format == ".json") {
+	if format == ".json" {
 		rt.Response.Header().Set("Content-Type", "application/json; charset=utf-8")
 		rt.Response.Write(GetJson(data))
-	} else{
-		rt.Render(rt.BaseLayout, data, rt.TemplatePath + rt.BaseTemplate, rt.TemplatePath + tpl)
+	} else {
+		rt.Render(rt.BaseLayout, data, rt.TemplatePath+rt.BaseTemplate, rt.TemplatePath+tpl)
 	}
 }
 

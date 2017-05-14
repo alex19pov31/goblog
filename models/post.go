@@ -2,8 +2,8 @@ package models
 
 import (
 	"gopkg.in/mgo.v2/bson"
-	"time"
 	"strings"
+	"time"
 )
 
 var postCollection = dbConnect.GetCollection("posts")
@@ -16,7 +16,7 @@ type Post struct {
 	Preview    string        `bson:"preview"`
 	Text       string        `bson:"text"`
 	User       User          `bson:"user"`
-	Tags 	   []string      `bson:"tags"`
+	Tags       []string      `bson:"tags"`
 	Created_at time.Time     `bson:"created_at,omitempty"`
 	Updated_at time.Time     `bson:"updated_at"`
 }
@@ -32,6 +32,7 @@ func (post *Post) GetId() string {
 
 func (post *Post) Save() {
 	post.Updated_at = time.Now()
+	post.User = CurUser
 	if post.Id == "" {
 		post.Id = bson.NewObjectId()
 		post.Created_at = post.Updated_at
