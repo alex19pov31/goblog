@@ -48,9 +48,9 @@ func (rt *Route) Delete(Pattern string, handler func(route *Route)) {
 	rt.Route("DELETE", Pattern, handler)
 }
 
-func (rt *Route) NotFound(layout string, Tpl ...string) {
+func (rt *Route) NotFound() {
 	if rt.Checked != true {
-		rt.Render(layout, false, Tpl...)
+		rt.Show("404.html", false, "html")
 	}
 }
 

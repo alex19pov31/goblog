@@ -56,13 +56,14 @@ func startAdminRoute(w http.ResponseWriter, r *http.Request) {
 		Data:         helpers.Data{"tmenu": topMenu, "lmenu": leftMenu},
 	}
 
-	defer route.Show("404.html", false, "html")
+	defer route.NotFound()
 
 	postsRoute(&route)
 	usersRoute(&route)
 
 	route.Credential(models.CurUser.Role == 1).Get("/(|\\?.*)$", func(route *helpers.Route) {
 		route.Show("index.html", false, "html")
+		return
 	})
 
 	route.Get("/login/?(|\\?.*)$", func(route *helpers.Route) {
@@ -114,7 +115,7 @@ func startMainRoute(w http.ResponseWriter, r *http.Request) {
 		Data:         helpers.Data{},
 	}
 
-	defer route.Show("404.html", false, "html")
+	defer route.NotFound()
 
 	route.Get("/?(|\\?.*)$", func(rt *helpers.Route) {
 		route.Show("index.html", false, "html")
